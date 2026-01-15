@@ -62,7 +62,9 @@ export default function Globe({
         .attr("cx", width / 2)
         .attr("cy", height / 2)
         .attr("r", 250)
-        .attr("fill", oceanColor);
+        .attr("fill", oceanColor)
+        .attr("stroke", darkMode ? "#666" : "#ccc")
+        .attr("stroke-width", 1);
 
       const g = svg.append("g");
       gRef.current = g;
@@ -87,7 +89,6 @@ export default function Globe({
         if (!gRef.current || !projectionRef.current) return;
         const centerX = width / 2;
         const centerY = height / 2;
-        const radius = 250;
 
         const circles = gRef.current
           .selectAll("circle.building")
@@ -110,10 +111,13 @@ export default function Globe({
             const projected = projectionRef.current!([d.lon, d.lat]);
             if (projected) {
               const [x, y] = projected;
-              const distance = Math.sqrt(
-                Math.pow(x - centerX, 2) + Math.pow(y - centerY, 2)
+              const center = [centerX, centerY];
+              const coordinate = [d.lon, d.lat];
+              const gdistance = d3.geoDistance(
+                coordinate as [number, number],
+                projectionRef.current!.invert(center) as [number, number]
               );
-              if (distance <= radius) {
+              if (gdistance <= 1.5) {
                 setHoveredBuilding(d);
                 setTooltipPos({ x: x + 10, y: y - 10 });
                 d3.select(this).attr("r", 6);
@@ -130,10 +134,13 @@ export default function Globe({
           const projected = projectionRef.current!([d.lon, d.lat]);
           if (projected) {
             const [x, y] = projected;
-            const distance = Math.sqrt(
-              Math.pow(x - centerX, 2) + Math.pow(y - centerY, 2)
+            const center = [centerX, centerY];
+            const coordinate = [d.lon, d.lat];
+            const gdistance = d3.geoDistance(
+              coordinate as [number, number],
+              projectionRef.current!.invert(center) as [number, number]
             );
-            const visible = distance <= radius;
+            const visible = gdistance <= 1.5;
             d3.select(this)
               .attr("cx", x)
               .attr("cy", y)
@@ -151,7 +158,6 @@ export default function Globe({
         if (!projectionRef.current || !gRef.current) return;
         const centerX = width / 2;
         const centerY = height / 2;
-        const radius = 250;
 
         rotationRef.current[0] += event.dx * 0.5;
         rotationRef.current[1] -= event.dy * 0.5;
@@ -162,10 +168,13 @@ export default function Globe({
           const projected = projectionRef.current!([d.lon, d.lat]);
           if (projected) {
             const [x, y] = projected;
-            const distance = Math.sqrt(
-              Math.pow(x - centerX, 2) + Math.pow(y - centerY, 2)
+            const center = [centerX, centerY];
+            const coordinate = [d.lon, d.lat];
+            const gdistance = d3.geoDistance(
+              coordinate as [number, number],
+              projectionRef.current!.invert(center) as [number, number]
             );
-            const visible = distance <= radius;
+            const visible = gdistance <= 1.5;
             d3.select(this)
               .attr("cx", x)
               .attr("cy", y)
@@ -182,10 +191,13 @@ export default function Globe({
           ]);
           if (projected) {
             const [x, y] = projected;
-            const distance = Math.sqrt(
-              Math.pow(x - centerX, 2) + Math.pow(y - centerY, 2)
+            const center = [centerX, centerY];
+            const coordinate = [hoveredBuilding.lon, hoveredBuilding.lat];
+            const gdistance = d3.geoDistance(
+              coordinate as [number, number],
+              projectionRef.current!.invert(center) as [number, number]
             );
-            if (distance <= radius) {
+            if (gdistance <= 1.5) {
               setTooltipPos({ x: x + 10, y: y - 10 });
             } else {
               setHoveredBuilding(null);
@@ -253,7 +265,11 @@ export default function Globe({
     const oceanColor = darkMode ? "#2a2a2a" : "#ffffff";
     const landColor = darkMode ? "#404040" : "#e0e0e0";
     const strokeColor = darkMode ? "#666" : "#999";
-    svg.selectAll("circle.ocean").attr("fill", oceanColor);
+    svg
+      .selectAll("circle.ocean")
+      .attr("fill", oceanColor)
+      .attr("stroke", darkMode ? "#666" : "#ccc")
+      .attr("stroke-width", 1);
     if (gRef.current) {
       gRef.current
         .selectAll("path")
@@ -265,7 +281,6 @@ export default function Globe({
   if (gRef.current && projectionRef.current && worldDataRef.current) {
     const centerX = width / 2;
     const centerY = height / 2;
-    const radius = 250;
 
     const circles = gRef.current
       .selectAll("circle.building")
@@ -288,10 +303,13 @@ export default function Globe({
         const projected = projectionRef.current!([d.lon, d.lat]);
         if (projected) {
           const [x, y] = projected;
-          const distance = Math.sqrt(
-            Math.pow(x - centerX, 2) + Math.pow(y - centerY, 2)
+          const center = [centerX, centerY];
+          const coordinate = [d.lon, d.lat];
+          const gdistance = d3.geoDistance(
+            coordinate as [number, number],
+            projectionRef.current!.invert(center) as [number, number]
           );
-          if (distance <= radius) {
+          if (gdistance <= 1.5) {
             setHoveredBuilding(d);
             setTooltipPos({ x: x + 10, y: y - 10 });
             d3.select(this).attr("r", 6);
@@ -308,10 +326,13 @@ export default function Globe({
       const projected = projectionRef.current!([d.lon, d.lat]);
       if (projected) {
         const [x, y] = projected;
-        const distance = Math.sqrt(
-          Math.pow(x - centerX, 2) + Math.pow(y - centerY, 2)
+        const center = [centerX, centerY];
+        const coordinate = [d.lon, d.lat];
+        const gdistance = d3.geoDistance(
+          coordinate as [number, number],
+          projectionRef.current!.invert(center) as [number, number]
         );
-        const visible = distance <= radius;
+        const visible = gdistance <= 1.5;
         d3.select(this)
           .attr("cx", x)
           .attr("cy", y)
@@ -333,15 +354,17 @@ export default function Globe({
       gRef.current.selectAll("path").attr("d", path as any);
       const centerX = width / 2;
       const centerY = height / 2;
-      const radius = 250;
       gRef.current.selectAll("circle.building").each(function (d: any) {
         const projected = projectionRef.current!([d.lon, d.lat]);
         if (projected) {
           const [x, y] = projected;
-          const distance = Math.sqrt(
-            Math.pow(x - centerX, 2) + Math.pow(y - centerY, 2)
+          const center = [centerX, centerY];
+          const coordinate = [d.lon, d.lat];
+          const gdistance = d3.geoDistance(
+            coordinate as [number, number],
+            projectionRef.current!.invert(center) as [number, number]
           );
-          const visible = distance <= radius;
+          const visible = gdistance <= 1.5;
           d3.select(this)
             .attr("cx", x)
             .attr("cy", y)
