@@ -113,9 +113,11 @@ export default function Globe({
               const [x, y] = projected;
               const center = [centerX, centerY];
               const coordinate = [d.lon, d.lat];
+              const inverted = projectionRef.current?.invert?.(center as [number, number]);
+              if (!inverted) return;
               const gdistance = d3.geoDistance(
                 coordinate as [number, number],
-                projectionRef.current!.invert(center) as [number, number]
+                inverted as [number, number]
               );
               if (gdistance <= 1.5) {
                 setHoveredBuilding(d);
